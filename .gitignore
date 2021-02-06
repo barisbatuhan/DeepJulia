@@ -1,0 +1,18 @@
+# Weight related issues
+weights/*.jld2
+pytorch_weights
+
+# Jupyter Notebook issues
+.ipynb_checkpoints
+*/.ipynb_checkpoints
+*/*/.ipynb_checkpoints
+*.ipynb
+*/*.ipynb
+*/*/*.ipynb
+
+# Extra files
+*.jpeg
+*.jpg
+*.png
+*.JPG
+*.PNG
