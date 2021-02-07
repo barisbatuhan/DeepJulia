@@ -100,30 +100,31 @@ function get_batch(tr::Transforms; restart::Bool=false)
         return nothing, nothing, nothing
     end
 
-    changes = Dict()
-
     w = tr.img_size[1]; h = tr.img_size[2]; img = nothing;
     if tr.batch_size == 1 && tr.img_size == -1
         img = convert(Array{Float32}, channelview(RGB.(load(tr.img_paths[tr.state[1]]))))
         w = size(img)[end]; h = size(img)[end-1];
     end
 
-    result = zeros(w, h, 3, tr.batch_size); ctr = 1;
+    result = zeros(w, h, 3, tr.batch_size); ctr = 1; changes = [];
 
     for idx in tr.state[1:tr.batch_size]
+        change = Dict()
+
         if img === nothing
             img = convert(Array{Float32}, channelview(RGB.(load(tr.img_paths[idx]))))
         end
 
         for process in tr.processes
             img, k, val = process(img)
-            if tr.return_changes; changes[k] = val; end;
+            if tr.return_changes; change[k] = val; end;
         end
 
         img .-= tr.means; img ./= tr.stds; 
         img = permutedims(reverse(img, dims=1), (3, 2, 1))
         result[:,:,:,ctr] .= img
-        
+        push!(changes, change)
+
         ctr += 1
         img = nothing
     end
