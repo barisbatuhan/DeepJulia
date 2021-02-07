@@ -3,52 +3,60 @@ using Knet
 include("core/layers.jl")
 
 """
-Moves the model to the GPU device.
+Moves the input to the GPU device.
 
 # Keywords:
-- model: the model to move 
+- input: the input to move 
 - dtype (optional): the data type where all weights and biased will be reconstructed. Default: KnetArray{Float32}
+
+Note: It can be used to move the models and inputs in Array{Union{Int, Float32, Float64}} format. For more
+complicated inputs, please convert them to KnetArrays manually.
 """
-function to_gpu(model; dtype=KnetArray{Float32})
-    return _to(model, dtype)
+function to_gpu(input; dtype=KnetArray{Float32})
+    return _to(input, dtype)
 end
 
 """
-Moves the model to the CPU device.
+Moves the input to the CPU device.
 
 # Keywords:
-- model: the model to move 
+- input: the input to move 
 - dtype (optional): the data type where all weights and biased will be reconstructed. Default: Array{Float32}
+
+Note: It can be used to move the models and inputs in KnetArray{Union{Int, Float32, Float64}} format. For more
+complicated inputs, please convert them to KnetArrays manually.
 """
-function to_cpu(model; dtype=Array{Float32})
-    return _to(model, dtype)
+function to_cpu(input; dtype=Array{Float32})
+    return _to(input, dtype)
 end
 
-function _to(model, dtype)
-    if typeof(model) <: BatchNorm2d
-        model.bnparams = Param(convert(dtype, value(model.bnparams)))
-        if model.bnmoments.mean !== nothing
-            model.bnmoments = bnmoments(
-                mean=convert(dtype, model.bnmoments.mean), 
-                var=convert(dtype, model.bnmoments.var)
+function _to(input, dtype)
+    if input <: Array || input <: KnetArray
+        return convert(dtype, input)
+    elseif typeof(input) <: BatchNorm2d
+        input.bnparams = Param(convert(dtype, value(input.bnparams)))
+        if input.bnmoments.mean !== nothing
+            input.bnmoments = bnmoments(
+                mean=convert(dtype, input.bnmoments.mean), 
+                var=convert(dtype, input.bnmoments.var)
                 )
         end
-    elseif typeof(model) <: Sequential
-        for i in 1:length(model.layers)
-            model.layers[i] = _to(model.layers[i], dtype)
+    elseif typeof(input) <: Sequential
+        for i in 1:length(input.layers)
+            input.layers[i] = _to(input.layers[i], dtype)
         end
-    elseif typeof(model) <: Union{Conv2d, Linear}
-        model.w = Param(convert(dtype, value(model.w)))
-        model.b = model.b === nothing ? nothing : Param(convert(dtype, value(model.b)))
+    elseif typeof(input) <: Union{Conv2d, Linear}
+        input.w = Param(convert(dtype, value(input.w)))
+        input.b = input.b === nothing ? nothing : Param(convert(dtype, value(input.b)))
     else
-        fields = fieldnames(typeof(model))
+        fields = fieldnames(typeof(input))
         for field in fields
-            if typeof(typeof(getfield(model, field))) <: DataType
-                setproperty!(model, field, _to(getfield(model, field), dtype))
+            if typeof(typeof(getfield(input, field))) <: DataType
+                setproperty!(input, field, _to(getfield(input, field), dtype))
             end
         end
     end
-    return model
+    return input
 end
 
 """
