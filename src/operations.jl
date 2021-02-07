@@ -81,7 +81,11 @@ function set_eval_mode(model)
 end
 
 function _set_mode(model, mode::Bool)
-    if typeof(model) <: Sequential
+    if model <: Array || model <: KnetArray
+        for i in 1:length(model)
+            model[i] = _set_mode(model[i], mode)
+        end
+    elseif typeof(model) <: Sequential
         for i in 1:length(model.layers)
             model.layers[i] = _set_mode(model.layers[i], mode)
         end
