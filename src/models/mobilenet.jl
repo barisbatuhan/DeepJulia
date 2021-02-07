@@ -26,7 +26,7 @@ mutable struct MobileNetV2
         pretrained::Bool=false, include_top::Bool=true, residual_setting=nothing)
         
         if pretrained
-            model = load_model("./weights/mobilenetv2.jld2")
+            model = load_model(dir() * "/weights/mobilenetv2.jld2")
             if !include_top
                 model.pred_module = nothing
             end

@@ -29,11 +29,7 @@ function to_cpu(model; dtype=Array{Float32})
 end
 
 function _to(model, dtype)
-    if model <: Array || model <: KnetArray
-        for i in 1:length(model)
-            model[i] = _to(model[i], dtype)
-        end
-    elseif typeof(model) <: BatchNorm2d
+    if typeof(model) <: BatchNorm2d
         model.bnparams = Param(convert(dtype, value(model.bnparams)))
         if model.bnmoments.mean !== nothing
             model.bnmoments = bnmoments(
@@ -50,9 +46,27 @@ function _to(model, dtype)
         model.b = model.b === nothing ? nothing : Param(convert(dtype, value(model.b)))
     else
         fields = fieldnames(typeof(model))
+        if length(fields) == 0
+            return nothing
+        end
         for field in fields
-            if typeof(typeof(getfield(model, field))) <: DataType
-                setproperty!(model, field, _to(getfield(model, field), dtype))
+            field_var = getfield(model, field)
+            if typeof(field_var) <: Array{String, 1} || typeof(field_var) <: Array{UInt8, 1}
+                return nothing
+            end
+            if typeof(field_var) <: Array 
+                for idx in 1:length(field_var)
+                    new_field_var = _to(field_var[idx], dtype)
+                    if new_field_var !== nothing
+                        field_var[idx] = new_field_var
+                    end
+                end
+                setproperty!(model, field, field_var)
+            else
+                new_field_var = _to(field_var, dtype)
+                if new_field_var !== nothing
+                    setproperty!(model, field, new_field_var)
+                end
             end
         end
     end
@@ -69,7 +83,6 @@ function set_train_mode(model)
     return _set_mode(model, true)
 end
 
-
 """
 Disables gradient storage and puts the model to evaluation mode.
 
@@ -81,11 +94,7 @@ function set_eval_mode(model)
 end
 
 function _set_mode(model, mode::Bool)
-    if model <: Array || model <: KnetArray
-        for i in 1:length(model)
-            model[i] = _set_mode(model[i], mode)
-        end
-    elseif typeof(model) <: Sequential
+    if typeof(model) <: Sequential
         for i in 1:length(model.layers)
             model.layers[i] = _set_mode(model.layers[i], mode)
         end
@@ -93,9 +102,27 @@ function _set_mode(model, mode::Bool)
         model.train_mode = mode
     else
         fields = fieldnames(typeof(model))
+        if length(fields) == 0
+            return nothing
+        end
         for field in fields
-            if typeof(typeof(getfield(model, field))) <: DataType
-                setproperty!(model, field, _set_mode(getfield(model, field), mode))
+            field_var = getfield(model, field)
+            if typeof(field_var) <: Array{String, 1} || typeof(field_var) <: Array{UInt8, 1}
+                return nothing
+            end
+            if typeof(field_var) <: Array 
+                for idx in 1:length(field_var)
+                    new_field_var = _set_mode(field_var[idx], mode)
+                    if new_field_var !== nothing
+                        field_var[idx] = new_field_var
+                    end
+                end
+                setproperty!(model, field, field_var)
+            else
+                new_field_var = _set_mode(field_var, mode)
+                if new_field_var !== nothing
+                    setproperty!(model, field, new_field_var)
+                end
             end
         end
     end

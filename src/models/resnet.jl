@@ -217,7 +217,7 @@ mutable struct ResNet
     end
 end
 
-function (rn::ResNet)(x; return_intermediate=false)
+function (rn::ResNet)(x)
     init_out = rn.init_layer(x)
     l1 = rn.layer1(init_out)
     l2 = rn.layer2(l1)
@@ -225,17 +225,9 @@ function (rn::ResNet)(x; return_intermediate=false)
     l4 = rn.layer4(l3)
     if rn.include_top
         out = rn.pred_layer(l4)
-        if return_intermediate
-            return l1, l2, l3, l4, out
-        else
-            return out
-        end
+        return out
     else
-        if return_intermediate
-            return l1, l2, l3, l4
-        else
-            return l4
-        end
+        return l4
     end
 end
 
@@ -276,14 +268,13 @@ end
 
 function _resnet(arch::String, block::DataType, layers::Array{Int}, pretrained::Bool, include_top::Bool)
     if pretrained
-        model = load_model("../weights/" * arch * ".jld2")
+        model = load_model(dir() * "/weights/" * arch * ".jld2")
         if !include_top
-            model.include_top = include_top
-            model.pred_layer = nothing
+            setproperty!(model, :include_top, false)
+            setproperty!(model, :pred_layer, nothing)
         end
         return model
     else
         return ResNet(block, layers, include_top=include_top)
     end
 end
-

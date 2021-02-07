@@ -22,9 +22,19 @@ DeepJulia is a Deep Learning library implemented in Julia Programming Language u
 
 - **Preprocessing Methods:** For image data, preprocessing methods are added, which include random & center crops, horizontal flip, square-image conversion and color distortion.
 
+- **Smooth L1 Loss:** Smooth L1 Loss is defined and included, since it is not present in Knet library.
+
 ## Links
 
 - The pretrained weights can be found in [this link](https://drive.google.com/drive/folders/1YRi2S-IA_Ekz7R9Ey2hf1OqyHo4PAsxv?usp=sharing). Please download the required ones and place them to `./weights` directory.
+
+## Usage
+
+Clone the whole repository to your working directory and just include the `DeepJulia.jl` file to the files you will use this library.
+
+```julia
+include("<DeepJulia_DIR>/DeepJulia.jl")
+```
 
 ## Sample Code
 
