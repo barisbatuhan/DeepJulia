@@ -100,10 +100,12 @@ function get_batch(tr::Transforms; restart::Bool=false)
         return nothing, nothing, nothing
     end
 
-    w = tr.img_size[1]; h = tr.img_size[2]; img = nothing;
+    w = nothing; h = nothing; img = nothing;
     if tr.batch_size == 1 && tr.img_size == -1
         img = convert(Array{Float32}, channelview(RGB.(load(tr.img_paths[tr.state[1]]))))
         w = size(img)[end]; h = size(img)[end-1];
+    else
+        w = tr.img_size[1]; h = tr.img_size[2];
     end
 
     result = zeros(w, h, 3, tr.batch_size); ctr = 1; changes = [];
@@ -117,6 +119,10 @@ function get_batch(tr::Transforms; restart::Bool=false)
 
         for process in tr.processes
             img, k, val = process(img)
+            if typeof(process) <: Squaritize && tr.batch_size == 1
+                changed_h = size(img, 2); changed_w = size(img, 3)
+                result = zeros(changed_w, changed_h, 3, tr.batch_size)
+            end
             if tr.return_changes; change[k] = val; end;
         end
 
