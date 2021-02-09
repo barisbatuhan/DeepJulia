@@ -46,7 +46,7 @@ function _to(model, dtype)
         model.b = model.b === nothing ? nothing : Param(convert(dtype, value(model.b)))
     else
         fields = fieldnames(typeof(model))
-        if length(fields) == 0
+        if length(fields) == 0 && !(typeof(model) <: Flatten)
             return nothing
         end
         for field in fields
@@ -102,7 +102,7 @@ function _set_mode(model, mode::Bool)
         model.train_mode = mode
     else
         fields = fieldnames(typeof(model))
-        if length(fields) == 0
+        if length(fields) == 0 && !(typeof(model) <: Flatten)
             return nothing
         end
         for field in fields
