@@ -181,7 +181,7 @@ function (rc::RandomCrop)(x)
     w_len = floor(Int, w * weight_ratio); h_len = floor(Int, h * height_ratio);
     
     x1 = rc.center ? max(1, floor(Int, w/2) - floor(Int, w_len/2)) : rand(1:1:max(1,w-w_len))
-    y1 = rc.center ? lax(1, floor(Int, h/2) - floor(Int, h_len/2)) : rand(1:1:max(1, h-h_len))
+    y1 = rc.center ? max(1, floor(Int, h/2) - floor(Int, h_len/2)) : rand(1:1:max(1, h-h_len))
     roi = [x1, y1, x1+w_len-1, y1+h_len-1] # x1, y1, x2, y2
 
     return x[:, roi[2]:roi[4], roi[1]:roi[3]], "crop", roi
