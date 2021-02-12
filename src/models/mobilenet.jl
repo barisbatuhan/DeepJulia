@@ -65,7 +65,7 @@ mutable struct MobileNetV2
            
         chain = Sequential(features)
         pred_module = include_top ? Sequential([
-            GlobalPool(),
+            AdaptivePool(1, mode=1),
             Flatten(),
             Dropout(0.2),
             Linear(last_channel, num_classes)

@@ -185,16 +185,18 @@ Adaptive Pooling layer for 4-dimensional inputs.
 
 # Keywords
 
-- output_size (Tuple, optional): desired output size after pooling operation.
-- mode (Int, optional): "0" for max pooling, "1" for average by also including padding, 
-"2" for average pooling without including paddings.
+- output_size (Tuple): desired output size after pooling operation.
+- mode (Int, optional): "0" for max pooling, "1" for average by also including padding. Default: "1"
 
 """
 mutable struct AdaptivePool 
-    output_size:: Tuple{Integer, Integer}
+    output_size::Union{Int, Tuple}
     mode::Int
 
-    function AdaptivePool(output_size; mode::Int = 0)
+    function AdaptivePool(output_size::Union{Int, Tuple{Int, Int}}; mode::Int=1)
+        if typeof(output_size) <: Int
+            output_size = (output_size, output_size)
+        end
         return new(output_size, mode)
     end
 end
@@ -203,7 +205,7 @@ function (adaptive_pool::AdaptivePool)(x)
     input_size = size(x)[1:2]
     stride = Int.(floor.(input_size ./ adaptive_pool.output_size))
     kernel_size = input_size .- (adaptive_pool.output_size .- 1) .* stride
-    pool_result = pool(x; window = kernel_size, stride = stride, padding = 0 ,mode = adaptive_pool.mode)
+    pool_result = pool(x; window=kernel_size, stride=stride, padding=0, mode=adaptive_pool.mode)
     return pool_result
 end
 
@@ -223,7 +225,7 @@ Default is set to window size, if stride=nothing is passed to the constructor.
 mutable struct Pool
     window::Union{Int, Tuple}; padding::Int; stride::Int; mode::Int;
 
-    function Pool(;window::Union{Int, Tuple}=2, padding::Int=0, stride=nothing, mode::Int=0)
+    function Pool(;window::Union{Int, Tuple{Int, Int}}=2, padding::Int=0, stride=nothing, mode::Int=0)
         stride = stride === nothing ? window : stride
         return new(window, padding, stride, mode)
     end
@@ -231,34 +233,6 @@ end
 
 function (po::Pool)(x) 
     return pool(x, window=po.window, padding=po.padding, stride=po.stride, mode=po.mode)
-end
-
-"""
-Global pooling layer which takes the average/max per each channel and creates 1x1xCxN
-dimensional outputs if the input is WxHxCxN dimensional.
-
-# Keywords
-
-- avg (bool, optional): if set to true, averages per channel will be calculated, else max. Default: "true"
-
-"""
-mutable struct GlobalPool
-    mode::Int;
-
-    function GlobalPool(;avg::Bool=true)
-        mode = avg == true ? 1 : 0
-        return new(mode)
-    end
-end
-
-function (gp::GlobalPool)(x)
-    if length(size(x)) != 4
-        println("[ERROR] Global pooling is not applied to a 4-dimensional output.")
-    end
-    
-    w, h, c, n = size(x)
-    # assuming that the input is square-shaped (w == h)
-    return pool(x, window=(w, h), mode=gp.mode)
 end
 
 

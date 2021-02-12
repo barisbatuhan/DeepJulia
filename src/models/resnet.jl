@@ -208,7 +208,7 @@ mutable struct ResNet
         pred_layer = nothing;
         if include_top
             pred_layer = Sequential([
-                GlobalPool(),
+                AdaptivePool(1, mode=1),
                 Flatten(),
                 Linear(512 * expansion, num_classes)
             ])

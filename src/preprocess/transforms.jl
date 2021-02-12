@@ -108,7 +108,7 @@ function get_batch(tr::Transforms; restart::Bool=false)
         w = tr.img_size[1]; h = tr.img_size[2];
     end
 
-    result = zeros(w, h, 3, tr.batch_size); ctr = 1; changes = [];
+    result = convert(Array{Float32}, zeros(w, h, 3, tr.batch_size)); ctr = 1; changes = [];
 
     for idx in tr.state[1:tr.batch_size]
         change = Dict()
@@ -127,7 +127,7 @@ function get_batch(tr::Transforms; restart::Bool=false)
         end
 
         img .-= tr.means; img ./= tr.stds; 
-        img = permutedims(reverse(img, dims=1), (3, 2, 1))
+        img = permutedims(img, (3, 2, 1))
         result[:,:,:,ctr] .= img
         push!(changes, change)
 
