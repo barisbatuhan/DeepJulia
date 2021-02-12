@@ -51,7 +51,7 @@ tr = Transforms(
         Flip(horizontal=true),
         DistortColor(probs=0.5)
     ],
-    ["cat.jpeg"],
+    ["./data/robin.jpeg"],
     img_size=224,
     return_changes=true,
     batch_size=1
@@ -62,7 +62,7 @@ imgs = convert(KnetArray{Float32}, imgs)
 preds = model(imgs)
 print(findmax(preds, dims=1))
 ```
-**Output:** You will see that the index output will be 286, which is the correct label to the cat image.
+**Output:** You will see that the index output will be 16, which is the correct label for the robin image.
 
 ## To-Do:
 
