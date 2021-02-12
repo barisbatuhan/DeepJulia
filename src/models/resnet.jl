@@ -200,10 +200,10 @@ mutable struct ResNet
             Relu(),
             Pool(window=3, padding=1, stride=2)
         ])
-        layer1 = _make_layer(block, 64, layers[1], values) 
-        layer2 = _make_layer(block, 128, layers[2], values, stride=2, dilate=replace_stride_with_dilation[1]) 
-        layer3 = _make_layer(block, 256, layers[3], values, stride=2, dilate=replace_stride_with_dilation[2]) 
-        layer4 = _make_layer(block, 512, layers[4], values, stride=2, dilate=replace_stride_with_dilation[3]) 
+        layer1 = _make_layer_resnet(block, 64, layers[1], values) 
+        layer2 = _make_layer_resnet(block, 128, layers[2], values, stride=2, dilate=replace_stride_with_dilation[1]) 
+        layer3 = _make_layer_resnet(block, 256, layers[3], values, stride=2, dilate=replace_stride_with_dilation[2]) 
+        layer4 = _make_layer_resnet(block, 512, layers[4], values, stride=2, dilate=replace_stride_with_dilation[3]) 
         
         pred_layer = nothing;
         if include_top
@@ -231,7 +231,7 @@ function (rn::ResNet)(x)
     end
 end
 
-function _make_layer(block::DataType, planes::Int, blocks::Int, values::Dict; stride::Int=1, dilate::Bool=false)
+function _make_layer_resnet(block::DataType, planes::Int, blocks::Int, values::Dict; stride::Int=1, dilate::Bool=false)
 
     downsample = nothing
     previous_dilation = deepcopy(values[:dilation])

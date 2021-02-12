@@ -18,14 +18,11 @@ can be found at: https://drive.google.com/drive/folders/1YRi2S-IA_Ekz7R9Ey2hf1Oq
 Note: Please scale images to [0,1] range, substract the means (0.406, 0.456, 0.485) and divide to stds
 (0.224, 0.225, 0.229) before feeding into this model.
 """
-function VGG11(; pretrained::Bool = false, 
-    include_top::Bool = true,
-    batchnorm::Bool = false,
-    flip_conv_kernels::Bool = false)::VGG
-    return _vgg(VGGType11, pretrained,
-     include_top, 
-     batchnorm ,
-       flip_conv_kernels)
+function VGG11(; pretrained::Bool=false, 
+    include_top::Bool=true,
+    batchnorm::Bool=false,
+    flip_conv_kernels::Bool=false)::VGG
+    return _vgg(VGGType11, pretrained, include_top, batchnorm, flip_conv_kernels)
 end
 
 """
@@ -42,11 +39,11 @@ can be found at: https://drive.google.com/drive/folders/1YRi2S-IA_Ekz7R9Ey2hf1Oq
 Note: Please scale images to [0,1] range, substract the means (0.406, 0.456, 0.485) and divide to stds
 (0.224, 0.225, 0.229) before feeding into this model.
 """
-function VGG13(; pretrained::Bool = false,
-     include_top::Bool = true,
-     batchnorm::Bool = false,
-     flip_conv_kernels::Bool = false)::VGG
-    return _vgg(VGGType13, pretrained, include_top, batchnorm,  flip_conv_kernels)
+function VGG13(; pretrained::Bool=false,
+     include_top::Bool=true,
+     batchnorm::Bool=false,
+     flip_conv_kernels::Bool=false)::VGG
+    return _vgg(VGGType13, pretrained, include_top, batchnorm, flip_conv_kernels)
 end
 
 
@@ -64,11 +61,11 @@ can be found at: https://drive.google.com/drive/folders/1YRi2S-IA_Ekz7R9Ey2hf1Oq
 Note: Please scale images to [0,1] range, substract the means (0.406, 0.456, 0.485) and divide to stds
 (0.224, 0.225, 0.229) before feeding into this model.
 """
-function VGG16(; pretrained::Bool = false,
-    include_top::Bool = true,
-    batchnorm::Bool = false,
-    flip_conv_kernels::Bool = false)::VGG
-    return _vgg(VGGType16, pretrained, include_top, batchnorm,  flip_conv_kernels)
+function VGG16(; pretrained::Bool=false,
+    include_top::Bool=true,
+    batchnorm::Bool=false,
+    flip_conv_kernels::Bool=false)::VGG
+    return _vgg(VGGType16, pretrained, include_top, batchnorm, flip_conv_kernels)
 end
 
 
@@ -86,10 +83,10 @@ can be found at: https://drive.google.com/drive/folders/1YRi2S-IA_Ekz7R9Ey2hf1Oq
 Note: Please scale images to [0,1] range, substract the means (0.406, 0.456, 0.485) and divide to stds
 (0.224, 0.225, 0.229) before feeding into this model.
 """
-function VGG19(; pretrained::Bool = false, 
-    include_top::Bool = true,
-    batchnorm::Bool = false,
-    flip_conv_kernels::Bool = false)::VGG
+function VGG19(; pretrained::Bool=false, 
+    include_top::Bool=true,
+    batchnorm::Bool=false,
+    flip_conv_kernels::Bool=false)::VGG
     return _vgg(VGGType19, pretrained, include_top, batchnorm, flip_conv_kernels)
 end
 
@@ -119,8 +116,8 @@ mutable struct VGG
     classifier::Sequential
     include_top::Bool
 
-    function VGG(; features::Sequential, num_classes = 1000, include_top::Bool = true, dropout_prob::Float64 = 0.5)
-        avg_pool = AdaptivePool((7,7); mode = 2)
+    function VGG(features::Sequential; num_classes=1000, include_top::Bool=true, dropout_prob::Float64=0.5)
+        avg_pool = AdaptivePool((7,7); mode=1)
         if include_top
             classifier = Sequential([
                 Flatten(),
@@ -150,17 +147,15 @@ function (vgg::VGG)(x)
     end
 end
 
-function _make_layers(; arch::VGGType, 
-    batchnorm::Bool = false,
-     flip_conv_kernels::Bool = false)::Sequential
+function _make_layers_vgg(arch::VGGType; batchnorm::Bool=false, flip_conv_kernels::Bool=false)::Sequential
     layers = []
     config::Array{Union{Integer,Char}} = vgg_configs[arch]
     in_channels = 3
     for v in config
         if v == 'M'
-            push!(layers, Pool(; window = 2, stride = 2, mode = 0))
+            push!(layers, Pool(; window=2, stride=2, mode=0))
         else
-            conv2d = Conv2d(in_channels, v, 3; padding = 1, flip_kernel = flip_conv_kernels)
+            conv2d = Conv2d(in_channels, v, 3; padding=1, flip_kernel=flip_conv_kernels)
             if batchnorm
                 push!(layers, [conv2d, BatchNorm2d(v), Relu()]...)
             else
@@ -176,7 +171,7 @@ function _vgg(arch::VGGType, pretrained::Bool, include_top::Bool, batchnorm::Boo
     if pretrained
         return throw(AssertionError("PRETRAINED MODEL NOT IMPLEMENTED YET"))
     else
-        features = _make_layers(;arch = arch, batchnorm = batchnorm, flip_conv_kernels = flip_conv_kernels)
-        return VGG(; features = features, include_top = include_top)
+        features =_make_layers_vgg(arch; batchnorm=batchnorm, flip_conv_kernels=flip_conv_kernels)
+        return VGG(features; include_top=include_top)
     end
 end
