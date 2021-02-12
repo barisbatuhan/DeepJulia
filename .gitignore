@@ -11,8 +11,8 @@ pytorch_weights
 */*/*.ipynb
 
 # Extra files
-*.jpeg
-*.jpg
-*.png
-*.JPG
-*.PNG
+/*.jpeg
+/*.jpg
+/*.png
+/*.JPG
+/*.PNG
