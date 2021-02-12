@@ -18,7 +18,7 @@ DeepJulia is a Deep Learning library implemented in Julia Programming Language u
 
 - **Kaiming Initializer:** Initialization with Kaiming is added especially for Convolution operations.
 
-- **Pretrained MOdels:** All basic ResNet structures, MobileNetV2 and VGG models are included in the library out-of-the-box. Also the pretrained ImageNet weights are availabel for all ResNet models and MobileNetV2 (work on progress for VGG).
+- **Pretrained Models:** All basic ResNet structures, MobileNetV2 and VGG models are included in the library out-of-the-box. Also the pretrained ImageNet weights are availabel for all ResNet models and MobileNetV2 (work on progress for VGG).
 
 - **Preprocessing Methods:** For image data, preprocessing methods are added, which include random & center crops, horizontal flip, square-image conversion and color distortion.
 
@@ -60,7 +60,7 @@ tr = Transforms(
 imgs, _, vals = get_batch(tr)
 imgs = convert(KnetArray{Float32}, imgs)
 preds = model(imgs)
-print(findmax(preds, dims=1))
+print(findmax(softmax(preds, dims=1), dims=1))
 ```
 **Output:** You will see that the index output will be 16, which is the correct label for the robin image.
 
