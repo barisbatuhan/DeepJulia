@@ -181,6 +181,33 @@ end
 
 
 """
+Adaptive Pooling layer for 4-dimensional inputs.
+
+# Keywords
+
+- output_size (Tuple, optional): desired output size after pooling operation.
+- mode (Int, optional): "0" for max pooling, "1" for average by also including padding, 
+"2" for average pooling without including paddings.
+
+"""
+mutable struct AdaptivePool 
+    output_size:: Tuple{Integer, Integer}
+    mode::Int
+
+    function AdaptivePool(output_size; mode::Int = 0)
+        return new(output_size, mode)
+    end
+end
+
+function (adaptive_pool::AdaptivePool)(x)
+    input_size = size(x)[1:2]
+    stride = Int.(floor.(input_size ./ adaptive_pool.output_size))
+    kernel_size = input_size .- (adaptive_pool.output_size .- 1) .* stride
+    pool_result = pool(x; window = kernel_size, stride = stride, padding = 0 ,mode = adaptive_pool.mode)
+    return pool_result
+end
+
+"""
 Pooling layer for 4-dimensional inputs.
 
 # Keywords
@@ -190,7 +217,7 @@ Pooling layer for 4-dimensional inputs.
 - stride (Int, Tuple or nothing, optional): stride size for pooling. 
 Default is set to window size, if stride=nothing is passed to the constructor.
 - mode (Int, optional): "0" for max pooling, "1" for average by also including padding, 
-"2" for average poolinw without including paddings.
+"2" for average pooling without including paddings.
 
 """
 mutable struct Pool

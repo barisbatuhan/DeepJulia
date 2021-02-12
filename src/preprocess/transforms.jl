@@ -43,8 +43,8 @@ mutable struct Transforms
         labels=nothing,
         batch_size::Int=1,
         img_size::Union{Tuple, Int}=224,
-        means::Tuple=(0.406, 0.456, 0.485),
-        stds::Tuple=(0.224, 0.225, 0.229),
+        means::Tuple=(0.485, 0.456, 0.406),
+        stds::Tuple=(0.229, 0.224, 0.225),
         shuffle::Bool=true,
         return_changes::Bool=false)
 
