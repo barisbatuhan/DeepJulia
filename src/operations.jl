@@ -142,3 +142,24 @@ For saving a model.
 function save_model(model, file_name)
     Knet.save(file_name, "model", model)
 end
+
+
+"""
+Has to be used before changing the optimizer or the learning rate. In Knet, once 
+the optimizer is called with a learning rate, then that optimizer is assigned to 
+all the Params of the network. If an optimizer is assigned to a Param, then calling
+the model with a different optimizer does not change anything. This methods removes
+all the optimizer assignments to ach of the network Params.
+
+# Keywords:
+
+- model (a network in training mode): the model to reset its optimizer information
+"""
+function zero_grad(model)
+    for p in params(model)
+        if p.opt !== nothing
+            p.opt = nothing
+        end
+    end
+    return model
+end
