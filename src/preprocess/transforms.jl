@@ -119,7 +119,7 @@ function get_batch(tr::Transforms; restart::Bool=false)
 
         for process in tr.processes
             img, k, val = process(img)
-            if typeof(process) <: Squaritize && tr.batch_size == 1
+            if typeof(process) <: Squaritize && tr.batch_size == 1 && tr.img_size == -1
                 changed_h = size(img, 2); changed_w = size(img, 3)
                 result = zeros(changed_w, changed_h, 3, tr.batch_size)
             end
